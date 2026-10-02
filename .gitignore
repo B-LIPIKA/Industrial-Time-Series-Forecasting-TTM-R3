@@ -1,0 +1,21 @@
+# Environments & Virtual Envs
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Data & Model Artifacts
+*.parquet
+*.csv
+checkpoints/
+artifacts/
+*.pt
+*.pth
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
