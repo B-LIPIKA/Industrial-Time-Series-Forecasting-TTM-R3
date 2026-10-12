@@ -1,22 +1,22 @@
 """
-Industrial temp Time-Series Synthetic Generator & Chronological Splitter
-Generates realistic industrial sensor temp telemetry with diurnal cycles,
-weekly operating shifts, process noise, and stochastic inflow surge spikes.
+Industrial Thermal & Temperature Time-Series Synthetic Generator & Chronological Splitter
+Generates realistic 15-minute industrial thermal sensor telemetry with heating/cooling cycles,
+weekly operating shifts, process thermal inertia, and stochastic thermal runaway spikes.
 """
 
 import numpy as np
 import pandas as pd
-from typing import Tuple, Dict
+from typing import Dict
 
 
-def generate_industrial_inflow_dataset(
+def generate_industrial_thermal_dataset(
     start_date: str = "2025-01-01",
     days: int = 180,
     sampling_interval_minutes: int = 15,
     seed: int = 42
 ) -> pd.DataFrame:
     """
-    Generates a multivariate industrial inflow sensor dataset.
+    Generates a multivariate industrial thermal dynamics sensor dataset.
     
     Parameters:
     - start_date: ISO start date string.
@@ -25,8 +25,8 @@ def generate_industrial_inflow_dataset(
     - seed: Random seed for reproducibility.
     
     Returns:
-    - pd.DataFrame containing datetime index, temp_rate (m3/h), pressure_bar,
-      turbidity_ntu, is_spike_event flag.
+    - pd.DataFrame containing datetime index, core_temperature_c, heater_power_kw,
+      cooling_flow_lpm, is_thermal_spike flag.
     """
     np.random.seed(seed)
     timestamps = pd.date_range(
@@ -36,40 +36,40 @@ def generate_industrial_inflow_dataset(
     )
     n = len(timestamps)
 
-    # 1. Base Diurnal Seasonality (Factory Operating Shifts)
+    # 1. Base Diurnal Thermal Curve (Plant Heating & Batch Cycles)
     hour = timestamps.hour + timestamps.minute / 60.0
-    daily_pattern = 40.0 + 25.0 * np.sin(2 * np.pi * (hour - 6) / 24) + 10.0 * np.sin(4 * np.pi * hour / 24)
+    daily_pattern = 65.0 + 12.0 * np.sin(2 * np.pi * (hour - 6) / 24) + 4.0 * np.sin(4 * np.pi * hour / 24)
 
-    # 2. Weekly Seasonality (Workweek vs Weekend duty cycles)
+    # 2. Operating Duty Factor (Weekday production vs weekend idle cooling)
     day_of_week = timestamps.dayofweek
-    weekday_factor = np.where(day_of_week < 5, 1.15, 0.65)
+    duty_factor = np.where(day_of_week < 5, 1.10, 0.75)
 
-    base_inflow = daily_pattern * weekday_factor
+    base_temp = daily_pattern * duty_factor
 
-    # 3. Macro Industrial Trend (Gradual seasonal shifts)
-    trend = np.linspace(0, 15, n)
+    # 3. Macro Seasonal Ambient Drift
+    ambient_drift = np.linspace(0, 8.0, n)
 
-    # 4. Realistic Sensor Measurement Noise
-    noise = np.random.normal(0, 2.5, n)
+    # 4. Realistic Thermal Measurement Noise (Thermocouple variance)
+    sensor_noise = np.random.normal(0, 1.2, n)
 
-    inflow_rate = np.maximum(5.0, base_inflow + trend + noise)
+    temp_series = np.maximum(20.0, base_temp + ambient_drift + sensor_noise)
 
-    # 5. Injection of Extreme Inflow Spikes (Sudden process surge / extreme runoff)
-    # Approx 1.5% of timestamps experience surges
+    # 5. Injection of Stochastic Thermal Runaway / Exothermic Surge Spikes
+    # Approx 1.5% of timestamps experience thermal surge events
     spike_mask = np.random.random(n) < 0.015
-    spike_amplitudes = np.random.uniform(40.0, 95.0, n)
-    temp_rate = np.where(spike_mask, temp_rate + spike_amplitudes, temp_rate)
+    spike_amplitudes = np.random.uniform(25.0, 55.0, n)
+    core_temperature_c = np.where(spike_mask, temp_series + spike_amplitudes, temp_series)
 
-    # Correlated Secondary Telemetry (Pressure & Turbidity)
-    pressure_bar = 3.5 + 0.03 * temp_rate + np.random.normal(0, 0.2, n)
-    turbidity_ntu = 12.0 + 0.15 * temp_rate + np.random.normal(0, 1.5, n)
+    # 6. Correlated Secondary Telemetry (Heater Power kW & Coolant Flow L/min)
+    heater_power_kw = np.maximum(0.0, 20.0 + 0.25 * core_temperature_c + np.random.normal(0, 1.5, n))
+    cooling_flow_lpm = np.maximum(5.0, 35.0 + 0.18 * core_temperature_c + np.random.normal(0, 2.0, n))
 
     df = pd.DataFrame({
         "timestamp": timestamps,
-        "temp_rate": np.round(inflow_rate, 2),
-        "pressure_bar": np.round(pressure_bar, 2),
-        "turbidity_ntu": np.round(turbidity_ntu, 2),
-        "is_spike": spike_mask.astype(int)
+        "core_temperature_c": np.round(core_temperature_c, 2),
+        "heater_power_kw": np.round(heater_power_kw, 2),
+        "cooling_flow_lpm": np.round(cooling_flow_lpm, 2),
+        "is_thermal_spike": spike_mask.astype(int)
     })
     return df
 
@@ -95,8 +95,8 @@ def chronological_split(
 
 
 if __name__ == "__main__":
-    data = generate_industrial_inflow_dataset(days=90)
+    data = generate_industrial_thermal_dataset(days=90)
     splits = chronological_split(data)
-    print(f"Generated {len(data)} sensor observations.")
+    print(f"Generated {len(data)} thermal sensor observations.")
     print(f"Train: {len(splits['train'])}, Val: {len(splits['val'])}, Test: {len(splits['test'])}")
-    print(f"Total spike events: {data['is_spike'].sum()}")
+    print(f"Total thermal spike events: {data['is_thermal_spike'].sum()}")

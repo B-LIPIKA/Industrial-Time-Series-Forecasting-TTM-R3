@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tiny Time Mixer (TTM-R3 Architecture) & Fine-Tuning Pipeline
 PyTorch implementation of the Tiny Time Mixer architecture for industrial sensor time-series forecasting.
 Supports fine-tuning, checkpoint loading, and inference.
@@ -185,3 +185,4 @@ class IndustrialTTMFineTuningPipeline:
     def load_checkpoint(self, path: str):
         if os.path.exists(path):
             self.model.load_state_dict(torch.load(path, map_location=self.device))
+

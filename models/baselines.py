@@ -1,4 +1,4 @@
-"""
+﻿"""
 Baseline Forecasting Models for Benchmark Comparison
 Includes Repeat-Period (Daily/Weekly Lag) and Rolling Mean Baselines.
 """
@@ -47,3 +47,4 @@ class RollingMeanBaseline:
     def predict(self, history: np.ndarray, horizon: int = 96) -> np.ndarray:
         mean_val = np.mean(history[-self.window:])
         return np.full(shape=(horizon,), fill_value=mean_val)
+

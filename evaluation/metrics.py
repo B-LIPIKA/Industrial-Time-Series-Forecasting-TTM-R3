@@ -1,4 +1,4 @@
-"""
+﻿"""
 Evaluation Metrics for Industrial Time-Series Forecasting
 Implements MAE, RMSE, MAPE, and sMAPE.
 """
@@ -41,3 +41,4 @@ def calculate_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> Dict[str, float
         "MAPE_percent": round(mape, 2),
         "sMAPE_percent": round(smape, 2)
     }
+

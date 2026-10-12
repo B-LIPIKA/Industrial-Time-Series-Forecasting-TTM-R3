@@ -1,6 +1,6 @@
 """
-Inflow Error Analysis & Regime Segregation
-Analyzes model performance across Normal Operating Regimes vs Extreme Inflow Spikes,
+Thermal Error Analysis & Regime Segregation
+Analyzes model performance across Steady-State Thermal Equilibrium vs Extreme Thermal Runaway Spikes,
 and evaluates performance degradation across extending forecast horizons.
 """
 
@@ -16,12 +16,12 @@ def perform_regime_error_analysis(
     spike_flags: np.ndarray
 ) -> Dict[str, Any]:
     """
-    Segregates errors between normal operating conditions and extreme inflow spikes.
+    Segregates errors between steady-state thermal conditions and extreme thermal runaway spikes.
     
     Parameters:
-    - y_true: Ground truth values.
-    - y_pred: Predicted values.
-    - spike_flags: Binary array indicating presence of surge spike event (1 = spike, 0 = normal).
+    - y_true: Ground truth values (°C).
+    - y_pred: Predicted values (°C).
+    - spike_flags: Binary array indicating presence of thermal excursion event (1 = spike, 0 = normal).
     
     Returns:
     - Structured dictionary with metrics for Normal, Spike, and Combined regimes.
@@ -51,9 +51,9 @@ def perform_regime_error_analysis(
             "mae_degradation_pct": degradation_pct
         },
         "insights": (
-            f"Under normal operating conditions, TTM-R3 achieves MAE of {normal_metrics.get('MAE', 0)} m3/h. "
-            f"During non-linear industrial surge spikes, error increases by {degradation_pct}%, "
-            f"highlighting the need for hybrid threshold-triggered safety buffers in downstream pump controllers."
+            f"Under steady-state thermal conditions, TTM-R3 achieves MAE of {normal_metrics.get('MAE', 0)} °C. "
+            f"During non-linear thermal runaway surges, error increases by {degradation_pct}%, "
+            f"highlighting the importance of pairing foundation models with automated emergency cooling threshold triggers."
         )
     }
 
