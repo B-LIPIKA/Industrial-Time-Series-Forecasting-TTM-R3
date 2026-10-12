@@ -1,6 +1,6 @@
 """
 Industrial Inflow Time-Series Synthetic Generator & Chronological Splitter
-Generates realistic 15-minute industrial sensor inflow telemetry with diurnal cycles,
+Generates realistic industrial sensor temp telemetry with diurnal cycles,
 weekly operating shifts, process noise, and stochastic inflow surge spikes.
 """
 
@@ -25,7 +25,7 @@ def generate_industrial_inflow_dataset(
     - seed: Random seed for reproducibility.
     
     Returns:
-    - pd.DataFrame containing datetime index, inflow_rate (m3/h), pressure_bar,
+    - pd.DataFrame containing datetime index, temp_rate (m3/h), pressure_bar,
       turbidity_ntu, is_spike_event flag.
     """
     np.random.seed(seed)
@@ -58,15 +58,15 @@ def generate_industrial_inflow_dataset(
     # Approx 1.5% of timestamps experience surges
     spike_mask = np.random.random(n) < 0.015
     spike_amplitudes = np.random.uniform(40.0, 95.0, n)
-    inflow_rate = np.where(spike_mask, inflow_rate + spike_amplitudes, inflow_rate)
+    temp_rate = np.where(spike_mask, temp_rate + spike_amplitudes, temp_rate)
 
     # Correlated Secondary Telemetry (Pressure & Turbidity)
-    pressure_bar = 3.5 + 0.03 * inflow_rate + np.random.normal(0, 0.2, n)
-    turbidity_ntu = 12.0 + 0.15 * inflow_rate + np.random.normal(0, 1.5, n)
+    pressure_bar = 3.5 + 0.03 * temp_rate + np.random.normal(0, 0.2, n)
+    turbidity_ntu = 12.0 + 0.15 * temp_rate + np.random.normal(0, 1.5, n)
 
     df = pd.DataFrame({
         "timestamp": timestamps,
-        "inflow_rate": np.round(inflow_rate, 2),
+        "temp_rate": np.round(inflow_rate, 2),
         "pressure_bar": np.round(pressure_bar, 2),
         "turbidity_ntu": np.round(turbidity_ntu, 2),
         "is_spike": spike_mask.astype(int)
