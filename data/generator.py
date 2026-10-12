@@ -1,6 +1,6 @@
-"""
+﻿"""
 Industrial Thermal & Temperature Time-Series Synthetic Generator & Chronological Splitter
-Generates realistic 15-minute industrial thermal sensor telemetry with heating/cooling cycles,
+Generates realistic 10-minute industrial thermal sensor telemetry with heating/cooling cycles,
 weekly operating shifts, process thermal inertia, and stochastic thermal runaway spikes.
 """
 
@@ -12,7 +12,7 @@ from typing import Dict
 def generate_industrial_thermal_dataset(
     start_date: str = "2025-01-01",
     days: int = 180,
-    sampling_interval_minutes: int = 15,
+    sampling_interval_minutes: int = 10,
     seed: int = 42
 ) -> pd.DataFrame:
     """
@@ -21,7 +21,7 @@ def generate_industrial_thermal_dataset(
     Parameters:
     - start_date: ISO start date string.
     - days: Total duration in days.
-    - sampling_interval_minutes: Interval between consecutive sensor readings (default 15m).
+    - sampling_interval_minutes: Interval between consecutive sensor readings (default 10m).
     - seed: Random seed for reproducibility.
     
     Returns:

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Industrial Thermal & Temperature Dynamics Forecasting Microservice (FastAPI)
 Maintains rolling thermal sensor buffer and serves short-to-long horizon predictions using IBM Granite TTM-R3.
 """
@@ -20,8 +20,8 @@ app = FastAPI(
 )
 
 # ----------------- In-Memory Rolling Sensor Buffer & Forecaster -----------------
-CONTEXT_LEN = 192  # 48 hours of 15-minute thermal observations
-HORIZON_LEN = 96   # 24 hours ahead (96 intervals of 15 minutes)
+CONTEXT_LEN = 192  # 32 hours of 10-minute thermal observations
+HORIZON_LEN = 96   # 16 hours ahead (96 intervals of 10 minutes)
 
 pipeline = IndustrialTTMFineTuningPipeline(context_len=CONTEXT_LEN, horizon_len=HORIZON_LEN)
 
@@ -62,7 +62,7 @@ def root():
     return {
         "service": "Industrial Thermal Dynamics Forecasting Engine",
         "model": "IBM Granite Tiny Time Mixer (TTM-R3)",
-        "frequency": "15-minute intervals",
+        "frequency": "10-minute intervals",
         "endpoints": [
             "/api/v1/health",
             "/api/v1/telemetry/ingest",
@@ -129,7 +129,7 @@ def generate_forecast(req: ForecastRequest):
     response = {
         "generated_at": datetime.utcnow().isoformat() + "Z",
         "horizon_steps": req.horizon_steps,
-        "forecast_horizon_hours": round(req.horizon_steps * 15 / 60.0, 2),
+        "forecast_horizon_hours": round(req.horizon_steps * 10 / 60.0, 2),
         "predictions": selected_preds,
         "summary_stats": {
             "mean_temperature_c": round(float(np.mean(selected_preds)), 2),

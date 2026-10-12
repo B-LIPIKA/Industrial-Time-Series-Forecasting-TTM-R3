@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit Tests for Industrial Thermal & Temperature Forecasting Pipeline
 """
 
@@ -19,7 +19,7 @@ client = TestClient(app)
 
 def test_dataset_generation():
     df = generate_industrial_thermal_dataset(days=10, seed=123)
-    assert len(df) == 10 * 24 * 4  # 960 rows for 15-min intervals
+    assert len(df) == 10 * 24 * 6  # 1440 rows for 10-min intervals
     assert "core_temperature_c" in df.columns
     assert "heater_power_kw" in df.columns
     assert "cooling_flow_lpm" in df.columns

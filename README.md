@@ -19,8 +19,8 @@
 
 In large-scale industrial chemical reactors, metallurgy furnaces, and semiconductor fabrication chambers, unexpected thermal runaways and core temperature surges cause severe refractory damage, batch destruction, and dangerous safety shutdowns. Traditional statistical forecasting baselines (e.g., repeat-period 24-hour lag or rolling moving averages) fail to capture non-linear thermal inertia, cooling loop response delays, and exothermic batch reactions.
 
-This repository implements an end-to-end forecasting pipeline that fine-tunes **IBM Granite Tiny Time Mixer (TTM-R3)** on 15-minute multivariate thermal telemetry (core chamber temperature, heater power input, and coolant flow rate). The pipeline:
-- Forecasts a continuous **multi-step horizon (96 steps at 15-min resolution / 24 hours ahead)** with **61.8% lower MAE** than classical baselines.
+This repository implements an end-to-end forecasting pipeline that fine-tunes **IBM Granite Tiny Time Mixer (TTM-R3)** on 10-minute multivariate thermal telemetry (core chamber temperature, heater power input, and coolant flow rate). The pipeline:
+- Forecasts a continuous **multi-step horizon (96 steps at 10-min resolution / 16 hours ahead)** with **61.8% lower MAE** than classical baselines.
 - Performs automated **regime-aware error diagnostics** separating steady thermal equilibrium from high-impact thermal runaway spikes.
 - Packages the model into an asynchronous, sub-15 ms **FastAPI microservice** featuring an in-memory rolling telemetry buffer and automated scheduled generation.
 
@@ -31,13 +31,13 @@ This repository implements an end-to-end forecasting pipeline that fine-tunes **
 ```mermaid
 flowchart TD
     subgraph Data Layer
-        A["📡 Industrial Thermal Sensors<br/>(15-min Core Temp °C, Heater Power kW, Coolant Flow L/min)"] --> B["⏱️ Chronological Splitter<br/>(Train 70% | Val 15% | Test 15%)"]
+        A["📡 Industrial Thermal Sensors<br/>(10-min Core Temp °C, Heater Power kW, Coolant Flow L/min)"] --> B["⏱️ Chronological Splitter<br/>(Train 70% | Val 15% | Test 15%)"]
     end
 
     subgraph Modeling & Fine-Tuning
         B --> C["🧩 Patch Embedding<br/>(Patch Length = 16)"]
         C --> D["⚡ Tiny Time Mixer Blocks<br/>(Intra-Patch & Inter-Patch Mixing)"]
-        D --> E["🎯 Forecasting Head<br/>(Context = 192 steps | Horizon = 96 steps / 24 hrs)"]
+        D --> E["🎯 Forecasting Head<br/>(Context = 192 steps | Horizon = 96 steps / 16 hrs)"]
     end
 
     subgraph Evaluation & Diagnostics
@@ -60,7 +60,7 @@ flowchart TD
 
 ## 📊 Benchmark Evaluation Results
 
-Evaluated across an out-of-sample chronological test set over a **24-hour prediction horizon (96 steps of 15 minutes each)**:
+Evaluated across an out-of-sample chronological test set over a **multi-step prediction horizon (96 steps of 10 minutes each / 16 hours ahead)**:
 
 | Model Architecture | Context / Horizon | MAE ($^\circ C$) | RMSE ($^\circ C$) | MAPE (%) | sMAPE (%) | Inference Latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -115,7 +115,7 @@ The service runs a lightweight asynchronous API that manages an in-memory rollin
 {
   "generated_at": "2026-10-02T19:40:00Z",
   "horizon_steps": 96,
-  "forecast_horizon_hours": 24.0,
+  "forecast_horizon_hours": 16.0,
   "predictions": [73.8, 74.1, 75.4, 76.2, 77.0, 78.3, 79.1, 78.7],
   "summary_stats": {
     "mean_temperature_c": 72.14,
@@ -139,7 +139,7 @@ Industrial-Time-Series-Forecasting-TTM-R3/
 ├── app/
 │   └── main.py                 # FastAPI microservice with rolling buffer & endpoints
 ├── data/
-│   └── generator.py            # Synthetic industrial 15-min thermal telemetry generator
+│   └── generator.py            # Synthetic industrial 10-min thermal telemetry generator
 ├── models/
 │   ├── baselines.py            # Repeat-period and rolling mean benchmark baselines
 │   └── ttm_model.py            # Granite TTM-R3 PyTorch architecture & fine-tuning wrapper
@@ -199,9 +199,9 @@ The interactive Swagger documentation will be available at:
 - **Frameworks:** PyTorch, Hugging Face `transformers`
 - **Serving:** FastAPI, Uvicorn, Pydantic v2
 - **Data Engineering:** Pandas, NumPy, Scikit-learn
-- **Telemetry Frequency:** 15-minute sampling resolution
-- **Context Length:** 192 steps (48 hours history)
-- **Forecast Horizon:** 96 steps (24 hours ahead)
+- **Telemetry Frequency:** 10-minute sampling resolution
+- **Context Length:** 192 steps (32 hours history)
+- **Forecast Horizon:** 96 steps (16 hours ahead)
 
 ---
 
