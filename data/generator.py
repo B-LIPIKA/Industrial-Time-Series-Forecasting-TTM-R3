@@ -1,5 +1,5 @@
 """
-Industrial Inflow Time-Series Synthetic Generator & Chronological Splitter
+Industrial temp Time-Series Synthetic Generator & Chronological Splitter
 Generates realistic industrial sensor temp telemetry with diurnal cycles,
 weekly operating shifts, process noise, and stochastic inflow surge spikes.
 """
